@@ -52,7 +52,7 @@ Range_smooth = 100;
 SavePath = 'E:\02_Project\03_HAD\01_DB\[20170411]_[Midan]_Brain\DataAnalysis';
 Delphi_Plot = true;
 Stereo_Plot = false;
-FusionBox_Plot = true;
+FusionBox_Plot = false;
 Reference_Polt = true;
 Stereo_Plot = true;
 %%  2.2. Plot
@@ -87,16 +87,16 @@ if Stereo_Plot == true
             tmp_StereoRefSet_PosY = tmp_Buffer;
             
             ValidMask = logical(data{idxStereo}.aSensorErrList.Stereo.bTrackValid);
-            plot(data{idxStereo}.aSensorErrList.Stereo.ref.PosY(ValidMask), data{idxStereo}.aSensorErrList.Stereo.ref.PosX(ValidMask),'o','color',PlotColorCode(4,:),'MarkerSize',4);
+            plot(data{idxStereo}.aSensorErrList.Stereo.ref.PosY(ValidMask), data{idxStereo}.aSensorErrList.Stereo.ref.PosX(ValidMask),'o','color',PlotColorCode(4,:),'MarkerSize',4); hold on;
             plot(tmpY, tmpX,'^','color',PlotColorCode(8,:),'MarkerSize',4);
         end
     end
     
-   StereoBoundary = boundary(tmp_StereoPointSet_PosY', tmp_StereoPointSet_PosX',0.01);
-   StereoRefBoundary = boundary(tmp_StereoRefSet_PosY', tmp_StereoRefSet_PosX', 0.01);
+%    StereoBoundary = boundary(tmp_StereoPointSet_PosY', tmp_StereoPointSet_PosX',0.01);
+%    StereoRefBoundary = boundary(tmp_StereoRefSet_PosY', tmp_StereoRefSet_PosX', 0.01);
     
-    plot(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
-    plot(tmp_StereoRefSet_PosY(StereoRefBoundary), tmp_StereoRefSet_PosX(StereoRefBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
+%     plot(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
+%     plot(tmp_StereoRefSet_PosY(StereoRefBoundary), tmp_StereoRefSet_PosX(StereoRefBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
     legend('Ego vehicle', 'Stereo', 'GPS');
     grid on; axis equal; box on; hold off;
     
@@ -284,8 +284,8 @@ for nFileIdx = 1:length(data)
             tmp_Object.Time = tmp_sensorList.Stereo.Time(nIndex);
             tmp_Object.NumofObj = tmp_sensorList.Stereo.NumofObj(nIndex);
             tmp_Object.nID = tmp_sensorList.Stereo.nID(nIndex);
-            tmp_Object.nAge = tmp_sensorList.Stereo.nAge(nIndex);
-            tmp_Object.nType = tmp_sensorList.Stereo.nType(nIndex);
+%             tmp_Object.nAge = tmp_sensorList.Stereo.nAge(nIndex);
+%             tmp_Object.nType = tmp_sensorList.Stereo.nType(nIndex);
             tmp_Object.Valid = tmp_sensorList.Stereo.Valid(nIndex);
             tmp_Object.PosX = tmp_sensorList.Stereo.PosX(nIndex);
             tmp_Object.PosY = tmp_sensorList.Stereo.PosY(nIndex);
@@ -296,8 +296,8 @@ for nFileIdx = 1:length(data)
             
             tmp_Object.ref.Time = tmp_sensorList.Stereo.ref.Time(nIndex);
             tmp_Object.ref.nID = tmp_sensorList.Stereo.ref.nID(nIndex);
-            tmp_Object.ref.nAge = tmp_sensorList.Stereo.ref.nAge(nIndex);
-            tmp_Object.ref.nType = tmp_sensorList.Stereo.ref.nType(nIndex);
+%             tmp_Object.ref.nAge = tmp_sensorList.Stereo.ref.nAge(nIndex);
+%             tmp_Object.ref.nType = tmp_sensorList.Stereo.ref.nType(nIndex);
             tmp_Object.ref.Valid = tmp_sensorList.Stereo.ref.Valid(nIndex);
             tmp_Object.ref.PosX = tmp_sensorList.Stereo.ref.PosX(nIndex);
             tmp_Object.ref.PosY = tmp_sensorList.Stereo.ref.PosY(nIndex);
@@ -531,7 +531,7 @@ set(Figure_Stereo_grid,'WindowButtonUpFcn',{@Callback_Stereogrid});
 [tmp_X, tmp_Y] = meshgrid(Stereo_GridX_Idx2meter, Stereo_GridY_Idx2meter);
 
 hold on; axis equal; box on; grid on;
-fill(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),PlotColorCode(2,:),'facealpha',0.1);
+% fill(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),PlotColorCode(2,:),'facealpha',0.1);
 plot(tmp_Y, tmp_X, '.','color',PlotColorCode(2,:));
 plot(Stereo_error_Y, Stereo_error_X,'b.');
 hold off;
@@ -554,15 +554,15 @@ ylabel('PosX [m]');
 % title('FusionBox Grid Cell', 'FontSize', 16);
 % xlabel('PosY [m]');
 % ylabel('PosX [m]');
-%% Save data
-ans_export = input('  - Do you want to export grid data? (y/n): ','s');
-if ans_export == 'y'
-    fprintf('\b exporting data...\n');
-    export_path = [Pathname(1:end-1),'_GridInfos.mat'];
-    save(export_path,...
-        'Delphi_Grid', 'Delphi_Grid_Object', 'Delphi_GridX_Idx2meter', 'Delphi_GridX_meter2Idx', 'Delphi_GridY_Idx2meter', 'Delphi_GridY_meter2Idx', ...
-        'Stereo_Grid', 'Stereo_Grid_Object', 'Stereo_GridX_Idx2meter', 'Stereo_GridX_meter2Idx', 'Stereo_GridY_Idx2meter', 'Stereo_GridY_meter2Idx', ...
-        'FusionBox_Grid', 'FusionBox_Grid_Object', 'FusionBox_GridX_Idx2meter', 'FusionBox_GridX_meter2Idx', 'FusionBox_GridY_Idx2meter', 'FusionBox_GridY_meter2Idx');
-    
-    disp(['  - [Info] Data is exported on "',export_path,'"']);
-end
+% %% Save data
+% ans_export = input('  - Do you want to export grid data? (y/n): ','s');
+% if ans_export == 'y'
+%     fprintf('\b exporting data...\n');
+%     export_path = [Pathname(1:end-1),'_GridInfos.mat'];
+%     save(export_path,...
+%         'Delphi_Grid', 'Delphi_Grid_Object', 'Delphi_GridX_Idx2meter', 'Delphi_GridX_meter2Idx', 'Delphi_GridY_Idx2meter', 'Delphi_GridY_meter2Idx', ...
+%         'Stereo_Grid', 'Stereo_Grid_Object', 'Stereo_GridX_Idx2meter', 'Stereo_GridX_meter2Idx', 'Stereo_GridY_Idx2meter', 'Stereo_GridY_meter2Idx', ...
+%         'FusionBox_Grid', 'FusionBox_Grid_Object', 'FusionBox_GridX_Idx2meter', 'FusionBox_GridX_meter2Idx', 'FusionBox_GridY_Idx2meter', 'FusionBox_GridY_meter2Idx');
+%     
+%     disp(['  - [Info] Data is exported on "',export_path,'"']);
+% end
