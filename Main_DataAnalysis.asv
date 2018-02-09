@@ -93,11 +93,11 @@ if Stereo_Plot == true
         end
     end
     
-    StereoBoundary = boundary(tmp_StereoPointSet_PosY', tmp_StereoPointSet_PosX',0.01);
-    StereoRefBoundary = boundary(tmp_StereoRefSet_PosY', tmp_StereoRefSet_PosX', 0.01);
-
-    plot(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
-    plot(tmp_StereoRefSet_PosY(StereoRefBoundary), tmp_StereoRefSet_PosX(StereoRefBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
+%    StereoBoundary = boundary(tmp_StereoPointSet_PosY', tmp_StereoPointSet_PosX',0.01);
+%    StereoRefBoundary = boundary(tmp_StereoRefSet_PosY', tmp_StereoRefSet_PosX', 0.01);
+    
+%     plot(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
+%     plot(tmp_StereoRefSet_PosY(StereoRefBoundary), tmp_StereoRefSet_PosX(StereoRefBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
     legend('Ego vehicle', 'Stereo', 'GPS');
     grid on; axis equal; box on; hold off;
     
@@ -155,7 +155,7 @@ if Reference_Polt == true
         
     end
 %     fill(tmp_DelphiPointSet_PosY(DelphiBoundary), tmp_DelphiPointSet_PosX(DelphiBoundary),PlotColorCode(2,:),'facealpha',0.3);
-    fill(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),PlotColorCode(4,:),'facealpha',0.3);
+%     fill(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),PlotColorCode(4,:),'facealpha',0.3);
 %     fill(tmp_FusionBoxPointSet_PosY(FusionBoxBoundary), tmp_FusionBoxPointSet_PosX(FusionBoxBoundary),PlotColorCode(6,:),'facealpha',0.3);
     grid on; axis equal; box on; hold off;
     
@@ -247,6 +247,58 @@ for nFileIdx = 1:length(data)
     end
 end
 %% Error estimation
+% %% Delphi
+% Delphi_error_X = zeros(0);
+% Delphi_error_Y = zeros(0);
+% 
+% fprintf('  - Analyzing Delphi grid...     ');
+% for nIdx_X = 1:length(Delphi_GridX_Idx2meter)
+%     for nIdx_Y = 1:length(Delphi_GridY_Idx2meter)
+%         fprintf('\b\b\b\b\b%3.f %%',100*nIdx_X*nIdx_Y/(length(Delphi_GridX_Idx2meter)*length(Delphi_GridY_Idx2meter)));
+%         if isempty(Delphi_Grid_Object{nIdx_X, nIdx_Y}); continue; end
+%         
+%         tmp_Delphi_error_X = zeros(0);
+%         tmp_Delphi_error_Y = zeros(0);
+%         tmp_Delphi_error_Vx = zeros(0);
+%         tmp_Delphi_error_Vy = zeros(0);
+%         tmp_Delphi_error_Heading = zeros(0);
+%         
+%         nNumOfObjects = length(Delphi_Grid_Object{nIdx_X,nIdx_Y});
+%         
+%         for nObjIdx = 1:nNumOfObjects
+%             Delphi_error_X(length(Delphi_error_X)+1) = Delphi_GridX_Idx2meter(nIdx_X) + Delphi_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.PosX;
+%             Delphi_error_Y(length(Delphi_error_Y)+1) = Delphi_GridY_Idx2meter(nIdx_Y) + Delphi_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.PosY;
+%             
+%             
+%             tmp_Delphi_error_X(length(tmp_Delphi_error_X)+1) = Delphi_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.PosX;
+%             tmp_Delphi_error_Y(length(tmp_Delphi_error_Y)+1) = Delphi_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.PosY;
+%             tmp_Delphi_error_Vx(length(tmp_Delphi_error_Vx)+1) = Delphi_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.Vx;
+%             tmp_Delphi_error_Vy(length(tmp_Delphi_error_Vy)+1) = Delphi_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.Vy;
+%             tmp_Delphi_error_Heading(length(tmp_Delphi_error_Heading)+1) = Delphi_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.Heading;
+%         end
+%         
+%         % mean
+%         tmp_Delphi_Error.PosX_mean = mean(tmp_Delphi_error_X);
+%         tmp_Delphi_Error.PosY_mean = mean(tmp_Delphi_error_Y);
+%         
+%         tmp_Delphi_Error.Vx_mean = mean(tmp_Delphi_error_Vx);
+%         tmp_Delphi_Error.Vy_mean = mean(tmp_Delphi_error_Vy);
+%         
+%         tmp_Delphi_Error.Heading_mean = mean(tmp_Delphi_error_Heading);
+%         
+%         % variance
+%         tmp_Delphi_Error.PosX_var = var(tmp_Delphi_error_X);
+%         tmp_Delphi_Error.PosY_var = var(tmp_Delphi_error_Y);
+%         
+%         tmp_Delphi_Error.Vx_var = var(tmp_Delphi_error_Vx);
+%         tmp_Delphi_Error.Vy_var = var(tmp_Delphi_error_Vy);
+%         
+%         tmp_Delphi_Error.Heading_var = var(tmp_Delphi_error_Heading);
+%         
+%         Delphi_Grid{nIdx_X,nIdx_Y} = tmp_Delphi_Error;
+%     end
+% end
+% fprintf('[complete]\n');
 %% Stereo
 Stereo_error_X = zeros(0);
 Stereo_error_Y = zeros(0);
@@ -297,9 +349,77 @@ for nIdx_X = 1:length(Stereo_GridX_Idx2meter)
     end
 end
 fprintf('[complete]\n');
-
+% %% FusionBox
+% FusionBox_error_X = zeros(0);
+% FusionBox_error_Y = zeros(0);
+% 
+% fprintf('  - Analyzing FusionBox grid...     ');
+% for nIdx_X = 1:length(FusionBox_GridX_Idx2meter)
+%     for nIdx_Y = 1:length(FusionBox_GridY_Idx2meter)
+%         fprintf('\b\b\b\b\b%3.f %%',100*nIdx_X*nIdx_Y/(length(FusionBox_GridX_Idx2meter)*length(FusionBox_GridY_Idx2meter)));
+%         
+%         if isempty(FusionBox_Grid_Object{nIdx_X, nIdx_Y}); continue; end
+%         
+%         tmp_FusionBox_error_X = zeros(0);
+%         tmp_FusionBox_error_Y = zeros(0);
+%         tmp_FusionBox_error_Vx = zeros(0);
+%         tmp_FusionBox_error_Vy = zeros(0);
+%         tmp_FusionBox_error_Heading = zeros(0);
+%         
+%         nNumOfObjects = length(FusionBox_Grid_Object{nIdx_X,nIdx_Y});
+%         
+%         for nObjIdx = 1:nNumOfObjects
+%             FusionBox_error_X(length(FusionBox_error_X)+1) = FusionBox_GridX_Idx2meter(nIdx_X) + FusionBox_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.PosX;
+%             FusionBox_error_Y(length(FusionBox_error_Y)+1) = FusionBox_GridY_Idx2meter(nIdx_Y) + FusionBox_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.PosY;
+%             
+%             
+%             tmp_FusionBox_error_X(length(tmp_FusionBox_error_X)+1) = FusionBox_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.PosX;
+%             tmp_FusionBox_error_Y(length(tmp_FusionBox_error_Y)+1) = FusionBox_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.PosY;
+%             tmp_FusionBox_error_Vx(length(tmp_FusionBox_error_Vx)+1) = FusionBox_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.Vx;
+%             tmp_FusionBox_error_Vy(length(tmp_FusionBox_error_Vy)+1) = FusionBox_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.Vy;
+%             tmp_FusionBox_error_Heading(length(tmp_FusionBox_error_Heading)+1) = FusionBox_Grid_Object{nIdx_X,nIdx_Y}{nObjIdx}.Heading;
+%         end
+%         
+%         % mean
+%         tmp_FusionBox_Error.PosX_mean = mean(tmp_FusionBox_error_X);
+%         tmp_FusionBox_Error.PosY_mean = mean(tmp_FusionBox_error_Y);
+%         
+%         tmp_FusionBox_Error.Vx_mean = mean(tmp_FusionBox_error_Vx);
+%         tmp_FusionBox_Error.Vy_mean = mean(tmp_FusionBox_error_Vy);
+%         
+%         tmp_FusionBox_Error.Heading_mean = mean(tmp_FusionBox_error_Heading);
+%         
+%         % variance
+%         tmp_FusionBox_Error.PosX_var = var(tmp_FusionBox_error_X);
+%         tmp_FusionBox_Error.PosY_var = var(tmp_FusionBox_error_Y);
+%         
+%         tmp_FusionBox_Error.Vx_var = var(tmp_FusionBox_error_Vx);
+%         tmp_FusionBox_Error.Vy_var = var(tmp_FusionBox_error_Vy);
+%         
+%         tmp_FusionBox_Error.Heading_var = var(tmp_FusionBox_error_Heading);
+%         
+%         FusionBox_Grid{nIdx_X,nIdx_Y} = tmp_FusionBox_Error;
+%     end
+% end
+% fprintf('[complete]\n');
 %% Plot grids
-% Stereo
+% %% delphi
+% Column = 3;
+% Figure_delphi_grid = figure('Name','Delphi gridcell','NumberTitle','off','Position',[ scrsz(3)/PlotArrSize(1)*(Column-1)     0 ...
+%     scrsz(3)/PlotArrSize(1)                scrsz(4) ]           );
+% set(Figure_delphi_grid,'WindowButtonUpFcn',{@Callback_Delphigrid});
+% 
+% [tmp_X, tmp_Y] = meshgrid(Delphi_GridX_Idx2meter, Delphi_GridY_Idx2meter);
+% 
+% hold on; axis equal; box on; grid on;
+% fill(tmp_DelphiPointSet_PosY(DelphiBoundary), tmp_DelphiPointSet_PosX(DelphiBoundary),PlotColorCode(2,:),'facealpha',0.1);
+% plot(tmp_Y, tmp_X, '.','color',PlotColorCode(2,:));
+% plot(Delphi_error_Y, Delphi_error_X,'b.');
+% hold off;
+% title('Delphi Grid Cell', 'FontSize', 16);
+% xlabel('PosY [m]');
+% ylabel('PosX [m]');
+%% Stereo
 Column = 4;
 Figure_Stereo_grid = figure('Name','Stereo gridcell','NumberTitle','off','Position',[ scrsz(3)/PlotArrSize(1)*(Column-1)     0 ...
     scrsz(3)/PlotArrSize(1)                scrsz(4) ]           );
@@ -308,10 +428,38 @@ set(Figure_Stereo_grid,'WindowButtonUpFcn',{@Callback_Stereogrid});
 [tmp_X, tmp_Y] = meshgrid(Stereo_GridX_Idx2meter, Stereo_GridY_Idx2meter);
 
 hold on; axis equal; box on; grid on;
-fill(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),PlotColorCode(2,:),'facealpha',0.1);
+% fill(tmp_StereoPointSet_PosY(StereoBoundary), tmp_StereoPointSet_PosX(StereoBoundary),PlotColorCode(2,:),'facealpha',0.1);
 plot(tmp_Y, tmp_X, '.','color',PlotColorCode(2,:));
 plot(Stereo_error_Y, Stereo_error_X,'b.');
 hold off;
 title('Stereo Grid Cell', 'FontSize', 16);
 xlabel('PosY [m]');
 ylabel('PosX [m]');
+% %% FusionBox
+% Column = 5;
+% Figure_FusionBox_grid = figure('Name','FusionBox gridcell','NumberTitle','off','Position',[ scrsz(3)/PlotArrSize(1)*(Column-1)     0 ...
+%     scrsz(3)/PlotArrSize(1)                scrsz(4) ]           );
+% set(Figure_FusionBox_grid,'WindowButtonUpFcn',{@Callback_FusionBoxgrid});
+% 
+% [tmp_X, tmp_Y] = meshgrid(FusionBox_GridX_Idx2meter, FusionBox_GridY_Idx2meter);
+% 
+% hold on; axis equal; box on; grid on;
+% fill(tmp_FusionBoxPointSet_PosY(FusionBoxBoundary), tmp_FusionBoxPointSet_PosX(FusionBoxBoundary),PlotColorCode(2,:),'facealpha',0.1);
+% plot(tmp_Y, tmp_X, '.','color',PlotColorCode(2,:));
+% plot(FusionBox_error_Y, FusionBox_error_X,'b.');
+% hold off;
+% title('FusionBox Grid Cell', 'FontSize', 16);
+% xlabel('PosY [m]');
+% ylabel('PosX [m]');
+% %% Save data
+% ans_export = input('  - Do you want to export grid data? (y/n): ','s');
+% if ans_export == 'y'
+%     fprintf('\b exporting data...\n');
+%     export_path = [Pathname(1:end-1),'_GridInfos.mat'];
+%     save(export_path,...
+%         'Delphi_Grid', 'Delphi_Grid_Object', 'Delphi_GridX_Idx2meter', 'Delphi_GridX_meter2Idx', 'Delphi_GridY_Idx2meter', 'Delphi_GridY_meter2Idx', ...
+%         'Stereo_Grid', 'Stereo_Grid_Object', 'Stereo_GridX_Idx2meter', 'Stereo_GridX_meter2Idx', 'Stereo_GridY_Idx2meter', 'Stereo_GridY_meter2Idx', ...
+%         'FusionBox_Grid', 'FusionBox_Grid_Object', 'FusionBox_GridX_Idx2meter', 'FusionBox_GridX_meter2Idx', 'FusionBox_GridY_Idx2meter', 'FusionBox_GridY_meter2Idx');
+%     
+%     disp(['  - [Info] Data is exported on "',export_path,'"']);
+% end
