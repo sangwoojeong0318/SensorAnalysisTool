@@ -41,6 +41,7 @@ EgoVehicle.sig_State_Hdg = CAN_GPS.sig_State_Hdg(Synched_CAN_Idx);
 EgoVehicle.VehicleSpeed = CAN_GPS.VehicleSpeed(Synched_CAN_Idx);
 
 Object.Stereo.ID = StereoObj.ID(:, Synched_CAN_Idx);
+Object.Stereo.Valid = StereoObj.Valid(:, Synched_CAN_Idx);
 Object.Stereo.X = StereoObj.X(:, Synched_CAN_Idx);
 Object.Stereo.Y = StereoObj.Y(:, Synched_CAN_Idx);
 
@@ -50,60 +51,51 @@ for idx = 1:1:size(EgoVehicle.sig_State_Lat,1)
     if(abs(EgoVehicle.sig_State_Lat(idx)-37.) < 5.0 && abs(EgoVehicle.sig_State_Lon(idx)-126.0) < 5.0)
         RefPos.Lat = EgoVehicle.sig_State_Lat(idx);
         RefPos.Lon = EgoVehicle.sig_State_Lon(idx);
+        break;
     end
 end
 
 EgoVehicle.enu = FnFast_llh2enu(RefPos.Lat, RefPos.Lon, EgoVehicle.sig_State_Lat, EgoVehicle.sig_State_Lon);
-
-tmpEnu = FnFast_llh2enu(RefPos.Lat, RefPos.Lon, TargetVehicle.OEM6_Latitude, TargetVehicle.OEM6_Longitude);
-TargetVehicle.enu = tmpEnu - EgoVehicle.enu;
-EgoVehicle.enu = 0*EgoVehicle.enu;
+TargetVehicle.enu = FnFast_llh2enu(RefPos.Lat, RefPos.Lon, TargetVehicle.OEM6_Latitude, TargetVehicle.OEM6_Longitude);
 
 % from enu to vehicle local coord
 [TargetVehicle.X_local, TargetVehicle.Y_local] = fnCoordCvt_llh2local(EgoVehicle.enu, EgoVehicle.sig_State_Hdg, ...
-    TargetVehicle.enu, TargetVehicle.OEM6_Heading);
+    TargetVehicle.enu - EgoVehicle.enu, TargetVehicle.OEM6_Heading);
 
 %% 04. Data association
 % fnDataAssociation(Object.Stereo.X, Object.Stereo.Y, TargetVehicle.X_local, TargetVehicle.Y_local);
 
 %% Plot
-% configuration
-scrsz = get(0,'ScreenSize');
-PlotArrSize = [5 4]; % Plot arrange size
-Plot_ColorTable % Load the plot color code
-Range_smooth = 100;
-Row = 2;
-Column = 1;
 
-% plot stereo
-% figure('Name','Stereo dectected position','NumberTitle','off','Position',[ scrsz(3)/PlotArrSize(1)*(Column-1)     scrsz(4)/PlotArrSize(2)*(PlotArrSize(2)-Row) ...
-%     scrsz(3)/PlotArrSize(1)                scrsz(4)/PlotArrSize(2) ]           );
-
+% Ego vehicle coordinate
 figure('Position',[1,1,400,1000]);
-
 subplot(5,2,1:10);
-fnPlotFigure(TargetVehicle.Y_local, TargetVehicle.X_local, '.-');
-hold on;
-for idx = 1:1:size(Object.Stereo.X,1)
-    Mask = Object.Stereo.ID(idx,:) ~= 0;
-    fnPlotFigure(Object.Stereo.Y(idx,Mask), Object.Stereo.X(idx,Mask), 'go');
-end
+
+plot(TargetVehicle.Y_local, TargetVehicle.X_local, '.-'); hold on;
+fnPlotObject(Object.Stereo, 'go');
+fnDrawBoundary(Object.Stereo);
 
 legend('GPS', 'Stereo');
-
-% fnDrawBoundary();
-
-tmpX = reshape(Object.Stereo.X, [1, size(Object.Stereo.X,1) * size(Object.Stereo.X,2)]);
-tmpY = reshape(Object.Stereo.Y, [1, size(Object.Stereo.Y,1) * size(Object.Stereo.Y,2)]);
-tmpID = reshape(Object.Stereo.ID, [1, size(Object.Stereo.ID,1) * size(Object.Stereo.ID,2)]);
-tmpValid_Idx = tmpID ~= 0;
-Valid_X = tmpX(tmpValid_Idx); Valid_X(length(Valid_X) + 1) = 0;
-Valid_Y = tmpY(tmpValid_Idx); Valid_Y(length(Valid_Y) + 1) = 0;
-
-StereoBoundary = boundary(Valid_X', Valid_Y',0.01);
-plot(Valid_Y(StereoBoundary), Valid_X(StereoBoundary),'color',PlotColorCode(8,:),'LineWidth',2);
-
 axis equal; hold off; grid on;
+
+% ENU coordinate
+figure();
+plot(EgoVehicle.enu(1, 1), EgoVehicle.enu(1, 2), 'r.');hold on;
+axis equal;
+grid on;
+xlabel('E(m)'); ylabel('N(m)');
+
+fnPlayVideo(EgoVehicle, TargetVehicle, Object.Stereo);
+
+cla;
+plot(EgoVehicle.enu(:,1), EgoVehicle.enu(:,2), 'r.'); hold on;
+plot(TargetVehicle.enu(:,1), TargetVehicle.enu(:,2), '.-');
+for idx = 1:1:size(Object.Stereo.X, 1)
+    ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu, EgoVehicle.sig_State_Hdg, Object.Stereo.X(idx,:), Object.Stereo.Y(idx,:), Object.Stereo.Valid(idx,:));
+    plot(ObjectEnu(:,1), ObjectEnu(:,2), 'go');
+end
+legend('Ego vehicle', 'Target vehicle', 'Stereo Obj');
+
 % 
 % TargetVel = SynchedInfo.A1Vel_kph';
 % % TargetAcc = CANoe_GPSDataFrames.Acc(Idx.TargetCANoe);

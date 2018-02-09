@@ -1,0 +1,16 @@
+function TargetEnu = fnCoordCvt_local2enu( EgoEnu, EgoHead, TargetX, TargetY )
+
+for idx = 1:1:length(EgoHead)
+    RotMat = [cosd(EgoHead(idx)) sind(EgoHead(idx));
+        -sind(EgoHead(idx)) cosd(EgoHead(idx))];
+    tmpXY = RotMat * [TargetX(idx);TargetY(idx)];
+    
+    e(idx) = tmpXY(1) + EgoEnu(idx, 1);
+    n(idx) = tmpXY(2) + EgoEnu(idx, 2);
+    u(idx) = 0;
+end
+
+TargetEnu = [e;n;u];
+
+end
+

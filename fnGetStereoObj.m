@@ -20,6 +20,7 @@ StereoObj.right_X(idxObj,:) = CAN_raw.Obj_right_x_1(idxUnique);
 StereoObj.right_Y(idxObj,:) = CAN_raw.Obj_right_y_1(idxUnique);
 StereoObj.heading(idxObj,:) = CAN_raw.Object_phi_1(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_1(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 % % StereoObj.age(idxObj,:)
 
 idxObj = 2;
@@ -34,6 +35,7 @@ StereoObj.right_X(idxObj,:) = CAN_raw.Obj_right_x_2(idxUnique);
 StereoObj.right_Y(idxObj,:) = CAN_raw.Obj_right_y_2(idxUnique);
 StereoObj.heading(idxObj,:) = CAN_raw.Object_phi_2(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_2(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 3;
 StereoObj.ID(idxObj,:) = CAN_raw.Obj_ID_3(idxUnique);
@@ -47,6 +49,7 @@ StereoObj.right_X(idxObj,:) = CAN_raw.Obj_right_x_3(idxUnique);
 StereoObj.right_Y(idxObj,:) = CAN_raw.Obj_right_y_3(idxUnique);
 StereoObj.heading(idxObj,:) = CAN_raw.Object_phi_3(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_3(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 4;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_4(idxUnique);
@@ -60,6 +63,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_4(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_4(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_4(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_4(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 5;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_5(idxUnique);
@@ -73,6 +77,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_5(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_5(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_5(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_5(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 6;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_6(idxUnique);
@@ -86,6 +91,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_6(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_6(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_6(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_6(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 7;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_7(idxUnique);
@@ -99,6 +105,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_7(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_7(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_7(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_7(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 8;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_8(idxUnique);
@@ -112,6 +119,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_8(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_8(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_8(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_8(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 9;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_9(idxUnique);
@@ -125,6 +133,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_9(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_9(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_9(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_9(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 10;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_10(idxUnique);
@@ -138,6 +147,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_10(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_10(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_10(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_10(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 11;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_11(idxUnique);
@@ -151,6 +161,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_11(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_11(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_11(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_11(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 idxObj = 12;
 StereoObj.ID(idxObj, :) = CAN_raw.Obj_ID_12(idxUnique);
@@ -164,6 +175,7 @@ StereoObj.right_X(idxObj, :) = CAN_raw.Obj_right_x_12(idxUnique);
 StereoObj.right_Y(idxObj, :) = CAN_raw.Obj_right_y_12(idxUnique);
 StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_12(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_12(idxUnique) * mps2kph;
+StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
 
 % 
