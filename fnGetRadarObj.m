@@ -1,10 +1,17 @@
-function StereoObj = fnGetRadarObj( CAN_raw )
+function RadarObj = fnGetRadarObj( CAN_raw )
+
+if max(CAN_raw.Valid) == 0
+    error('No radar data');
+end
+
+UTCTime = CAN_raw.GPS_Type(:,1) * 10;
+[tmpSpace, idxUnique] = unique(UTCTime);
 
 % Get Radar info
 rad2deg = 180.0 / 3.141592;
 mps2kph = 3.6;
 
-RadarMaxObj = 63;
+RadarMaxObj = max(CAN_raw.NumObject);
 
 Object_ID = 'CAN_raw.Object_ID_';
 ReferencePoint = 'CAN_raw.ReferencePoint_';
@@ -14,85 +21,86 @@ y_m = 'CAN_raw.y_m_';
 Length_m = 'CAN_raw.Length_m_';
 Width_m = 'CAN_raw.Width_m_';
 
-RadarObj.NumObject(1,:) = CAN_raw.NumObject;
+tmpRadarObj.NumObject(1,:) = CAN_raw.NumObject;
 
-RadarObj.Valid = zeros(RadarMaxObj, length(RadarObj.NumObject));
-RadarObj.Object_ID = zeros(RadarMaxObj, length(RadarObj.NumObject));
-RadarObj.ReferencePoint = zeros(RadarMaxObj, length(RadarObj.NumObject));
-RadarObj.Orientation_rad = zeros(RadarMaxObj, length(RadarObj.NumObject));
-RadarObj.x_m = zeros(RadarMaxObj, length(RadarObj.NumObject));
-RadarObj.y_m = zeros(RadarMaxObj, length(RadarObj.NumObject));
-RadarObj.Length_m = zeros(RadarMaxObj, length(RadarObj.NumObject));
-RadarObj.Width_m = zeros(RadarMaxObj, length(RadarObj.NumObject));
+for idx_obj = 1:1:RadarMaxObj
+    SigObjectID = sprintf('%s%s', Object_ID, num2str(idx_obj));
+    SigReferencePoint = sprintf('%s%s', ReferencePoint, num2str(idx_obj));
+    SigOrientation_rad = sprintf('%s%s', Orientation_rad, num2str(idx_obj));
+    Sigx_m = sprintf('%s%s', x_m, num2str(idx_obj));
+    Sigy_m = sprintf('%s%s', y_m, num2str(idx_obj));
+    SigLength_m= sprintf('%s%s', Length_m, num2str(idx_obj));
+    SigWidth_m = sprintf('%s%s', Width_m, num2str(idx_obj));
+    
+    tmpRadarObj.Object_ID(idx_obj, :) = eval(SigObjectID);
+    tmpRadarObj.ReferencePoint(idx_obj, :) = eval(SigReferencePoint);
+    tmpRadarObj.Orientation_rad(idx_obj, :) = eval(SigOrientation_rad);
+    tmpRadarObj.Length_m(idx_obj, :) = eval(SigLength_m);
+    tmpRadarObj.Width_m(idx_obj, :) = eval(SigWidth_m);
+    tmp_x_m(idx_obj, :) = eval(Sigx_m);
+    tmp_y_m(idx_obj, :) = eval(Sigy_m);
+    
+end
 
-for idx_data = 1 : 1 : length(RadarObj.NumObject)
+for idx_data = 1 : 1 : length(tmpRadarObj.NumObject)
     for idx_obj = 1 : 1 : RadarMaxObj
-        if idx_obj <= RadarObj.NumObject(idx_data)
-            SigObjectID = sprintf('%s%s(%s)', Object_ID, num2str(idx_obj), num2str(idx_data));
-            SigReferencePoint = sprintf('%s%s(%s)', ReferencePoint, num2str(idx_obj), num2str(idx_data));
-            SigOrientation_rad = sprintf('%s%s(%s)', Orientation_rad, num2str(idx_obj), num2str(idx_data));
-            Sigx_m = sprintf('%s%s(%s)', x_m, num2str(idx_obj), num2str(idx_data));
-            Sigy_m = sprintf('%s%s(%s)', y_m, num2str(idx_obj), num2str(idx_data));
-            SigLength_m= sprintf('%s%s(%s)', Length_m, num2str(idx_obj), num2str(idx_data));
-            SigWidth_m = sprintf('%s%s(%s)', Width_m, num2str(idx_obj), num2str(idx_data));
-            
-            RadarObj.Object_ID(idx_obj, idx_data) = eval(SigObjectID);
-            RadarObj.ReferencePoint(idx_obj, idx_data) = eval(SigReferencePoint);
-            RadarObj.Orientation_rad(idx_obj, idx_data) = eval(SigOrientation_rad);
-            RadarObj.Length_m(idx_obj, idx_data) = eval(SigLength_m);
-            RadarObj.Width_m(idx_obj, idx_data) = eval(SigWidth_m);
-            
-            tmp_x_m = eval(Sigx_m);
-            tmp_y_m = eval(Sigy_m);
-            tmp_ReferencePoint = RadarObj.ReferencePoint(idx_obj, idx_data);
-            tmp_Orientation_rad = RadarObj.Orientation_rad(idx_obj, idx_data);
-            tmp_Length_m = RadarObj.Length_m(idx_obj, idx_data);
-            tmp_Width_m = RadarObj.Width_m(idx_obj, idx_data);
+        if idx_obj <= tmpRadarObj.NumObject(idx_data)
+            x_m = tmp_x_m(idx_obj, idx_data);
+            y_m = tmp_y_m(idx_obj, idx_data);
+            tmp_ReferencePoint = tmpRadarObj.ReferencePoint(idx_obj, idx_data);
+            tmp_Orientation_rad = tmpRadarObj.Orientation_rad(idx_obj, idx_data);
+            tmp_Length_m = tmpRadarObj.Length_m(idx_obj, idx_data);
+            tmp_Width_m = tmpRadarObj.Width_m(idx_obj, idx_data);
             tmp_Orientation_cos = cos(tmp_Orientation_rad);
             tmp_Orientation_sin = sin(tmp_Orientation_rad);
             
             if tmp_ReferencePoint == 0 %% Center of gravity
-                RadarObj.Valid(idx_obj, idx_data) = 0;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 0;
             elseif tmp_ReferencePoint == 1 %% FL corner
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m - tmp_Length_m / 2 * tmp_Orientation_cos + tmp_Width_m / 2 * tmp_Orientation_sin;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m - tmp_Length_m / 2 * tmp_Orientation_sin - tmp_Width_m / 2 * tmp_Orientation_cos;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m - tmp_Length_m / 2 * tmp_Orientation_cos + tmp_Width_m / 2 * tmp_Orientation_sin;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m - tmp_Length_m / 2 * tmp_Orientation_sin - tmp_Width_m / 2 * tmp_Orientation_cos;
             elseif tmp_ReferencePoint == 2 %% FR corner
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m - tmp_Length_m / 2 * tmp_Orientation_cos - tmp_Width_m / 2 * tmp_Orientation_sin;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m - tmp_Length_m / 2 * tmp_Orientation_sin + tmp_Width_m / 2 * tmp_Orientation_cos;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m - tmp_Length_m / 2 * tmp_Orientation_cos - tmp_Width_m / 2 * tmp_Orientation_sin;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m - tmp_Length_m / 2 * tmp_Orientation_sin + tmp_Width_m / 2 * tmp_Orientation_cos;
             elseif tmp_ReferencePoint == 3 %% RR corner
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m + tmp_Length_m / 2 * tmp_Orientation_cos - tmp_Width_m / 2 * tmp_Orientation_sin;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m + tmp_Length_m / 2 * tmp_Orientation_sin + tmp_Width_m / 2 * tmp_Orientation_cos;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m + tmp_Length_m / 2 * tmp_Orientation_cos - tmp_Width_m / 2 * tmp_Orientation_sin;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m + tmp_Length_m / 2 * tmp_Orientation_sin + tmp_Width_m / 2 * tmp_Orientation_cos;
             elseif tmp_ReferencePoint == 4 %% RL corner
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m + tmp_Length_m / 2 * tmp_Orientation_cos + tmp_Width_m / 2 * tmp_Orientation_sin;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m + tmp_Length_m / 2 * tmp_Orientation_sin - tmp_Width_m / 2 * tmp_Orientation_cos;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m + tmp_Length_m / 2 * tmp_Orientation_cos + tmp_Width_m / 2 * tmp_Orientation_sin;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m + tmp_Length_m / 2 * tmp_Orientation_sin - tmp_Width_m / 2 * tmp_Orientation_cos;
             elseif tmp_ReferencePoint == 5 %% Center of Front
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m - tmp_Length_m / 2 * tmp_Orientation_cos;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m - tmp_Length_m / 2 * tmp_Orientation_sin;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m - tmp_Length_m / 2 * tmp_Orientation_cos;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m - tmp_Length_m / 2 * tmp_Orientation_sin;
             elseif tmp_ReferencePoint == 6 %% Center of right
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m - tmp_Width_m / 2 * tmp_Orientation_sin;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m + tmp_Width_m / 2 * tmp_Orientation_cos;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m - tmp_Width_m / 2 * tmp_Orientation_sin;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m + tmp_Width_m / 2 * tmp_Orientation_cos;
             elseif tmp_ReferencePoint == 7 %% Center of rear
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m + tmp_Length_m / 2 * tmp_Orientation_cos;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m + tmp_Length_m / 2 * tmp_Orientation_sin;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m + tmp_Length_m / 2 * tmp_Orientation_cos;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m + tmp_Length_m / 2 * tmp_Orientation_sin;
             elseif tmp_ReferencePoint == 8 %% Center of left
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m + tmp_Width_m / 2 * tmp_Orientation_sin;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m - tmp_Width_m / 2 * tmp_Orientation_cos;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m + tmp_Width_m / 2 * tmp_Orientation_sin;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m - tmp_Width_m / 2 * tmp_Orientation_cos;
             elseif tmp_ReferencePoint == 9 %% Center of box
-                RadarObj.Valid(idx_obj, idx_data) = 1;
-                RadarObj.x_m(idx_obj, idx_data) = tmp_x_m;
-                RadarObj.y_m(idx_obj, idx_data) = tmp_y_m;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 1;
+                tmpRadarObj.x_m(idx_obj, idx_data) = x_m;
+                tmpRadarObj.y_m(idx_obj, idx_data) = y_m;
             elseif tmp_ReferencePoint == 15 %% Invalid
-                RadarObj.Valid(idx_obj, idx_data) = 0;
+                tmpRadarObj.Valid(idx_obj, idx_data) = 0;
             end
         end
     end
 end
+
+RadarObj.Object_ID = tmpRadarObj.Object_ID(:,idxUnique);
+RadarObj.x_m = tmpRadarObj.x_m(:,idxUnique);
+RadarObj.y_m = tmpRadarObj.y_m(:,idxUnique);
+RadarObj.Valid = tmpRadarObj.Valid(:,idxUnique);
 end

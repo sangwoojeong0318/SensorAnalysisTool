@@ -1,8 +1,0 @@
-function fnPlotObject(Object, shape)
-
-for idx = 1:1:size(Object.X,1)
-    Mask = Object.Stereo.Valid(idx,:) ~= 0;
-    plot(Object.Stereo.Y(idx,Mask), Object.Stereo.X(idx,Mask), 'go');
-end
-
-end

@@ -1,6 +1,6 @@
 function fnDrawBoundary( Object )
-tmpX = reshape(Object.X, [1, size(Object.X,1) * size(Object.X,2)]);
-tmpY = reshape(Object.Y, [1, size(Object.Y,1) * size(Object.Y,2)]);
+tmpX = reshape(Object.X_m, [1, size(Object.X_m,1) * size(Object.X_m,2)]);
+tmpY = reshape(Object.Y_m, [1, size(Object.Y_m,1) * size(Object.Y_m,2)]);
 tmpValid = reshape(Object.Valid, [1, size(Object.Valid,1) * size(Object.Valid,2)]);
 tmpValid_Idx = tmpValid ~= 0;
 Valid_X = tmpX(tmpValid_Idx); Valid_X(length(Valid_X) + 1) = 0;
