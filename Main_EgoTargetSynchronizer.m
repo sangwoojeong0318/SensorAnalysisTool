@@ -9,19 +9,20 @@ db_mat_Path = 'DB\AutonomousFlexRay_DB.mat';
 
 %% 01. Load the logging data
 % 1.1 extract GPS from FlexRay
-Flexray_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\Logging11\KATRI_A1_11.mat';
+Flexray_sig_path = 'D:\10_DB\SensorAnalysis\[180208]_KATRI_Zoe1\KATRI_A1_22.mat';
 FlexRay_raw = load(Flexray_sig_path);
 FlexRay_GPS = fnGetFlexrayGPS(FlexRay_raw);
 
 % 1.2 extract GPS from CAN
-CAN_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\Logging11\KATRI_Zoe2_M011.mat';
+CAN_sig_path = 'D:\10_DB\SensorAnalysis\[180208]_KATRI_Zoe1\KATRI_Zoe1_008.mat';
 CAN_raw = load(CAN_sig_path);
 CAN_GPS = fnGetCANGPS(CAN_raw);
 
 % 1.3 extract stereo object from CAN
 StereoObj = fnGetStereoObj(CAN_raw);
 
-% 1.2 
+% 1.4 extract valeo radar object from CAN
+RadarObj = fnGetRadarObj(CAN_raw);
 
 %% 02. Time synchronization
 % SynchedInfo = fnSynchronizer(EgoInfo, TargetInfo);
