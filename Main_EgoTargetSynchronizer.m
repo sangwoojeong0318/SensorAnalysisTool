@@ -9,18 +9,18 @@ db_mat_Path = 'DB\AutonomousFlexRay_DB.mat';
 StereoAnalysis = true;
 ViewStereoVideo = true;
 
-RadarAnalysis = true;
-ViewRadarVideo = true;
+RadarAnalysis = false;
+ViewRadarVideo = false;
 
 %% 01. Load the logging data
 % 1.1 extract GPS from FlexRay
-Flexray_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\NewFolder\KATRI_A1_22.mat';
+Flexray_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\KATRI_A1_11.mat';
 FlexRay_raw = load(Flexray_sig_path);
 
 FlexRay_GPS = fnGetFlexrayGPS(FlexRay_raw);
 
 % 1.2 extract GPS from CAN
-CAN_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\NewFolder\KATRI_Zoe1_008.mat';
+CAN_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\KATRI_Zoe2_M011.mat';
 CAN_raw = load(CAN_sig_path);
 CAN_GPS = fnGetCANGPS(CAN_raw);
 
@@ -88,76 +88,97 @@ TargetVehicle.enu = FnFast_llh2enu(RefPos.Lat, RefPos.Lon, TargetVehicle.OEM6_La
 %% 05. Plot
 
 % 5.1 Ego vehicle coordinate
-% Draw stereo
-if StereoAnalysis == true
+% Draw stereo/radar
+if StereoAnalysis == true || RadarAnalysis == true
     figure('Position',[1,1,400,1000]);
     subplot(5,2,1:10);
 
     plot(TargetVehicle.Y_local, TargetVehicle.X_local, '.-'); hold on;
-    fnPlotObject(Object.Stereo, 'go');
-    fnDrawBoundary(Object.Stereo);
-
-    legend('GPS', 'Stereo');
+    
+    if StereoAnalysis == true
+        fnPlotObject(Object.Stereo, 'go');
+%         fnDrawBoundary(Object.Stereo);
+    end
+    if RadarAnalysis == true
+        fnPlotObject(Object.Radar, 'r^');
+%         fnDrawBoundary(Object.Radar);
+    end
+        
+    legend('GPS', 'Stereo', 'Radar');
+    xlabel('Y(m)'); ylabel('X(m)');
     axis equal; hold off; grid on;
+    ylim([-10 100]); xlim([-20 20]);
 end
 
-% Draw radar
-if RadarAnalysis == true
-    figure('Position',[401,1,400,1000]);
-    subplot(5,2,1:10);
-
-    plot(TargetVehicle.Y_local, TargetVehicle.X_local, '.-'); hold on;
-    fnPlotObject(Object.Radar, 'g^');
-    fnDrawBoundary(Object.Radar);
-
-    legend('GPS', 'Radar');
-    axis equal; hold off; grid on;
-end
+% % Draw radar
+% if RadarAnalysis == true
+%     figure('Position',[401,1,400,1000]);
+%     subplot(5,2,1:10);
+% 
+%     plot(TargetVehicle.Y_local, TargetVehicle.X_local, '.-'); hold on;
+%     fnPlotObject(Object.Radar, 'g^');
+%     fnDrawBoundary(Object.Radar);
+% 
+%     legend('GPS', 'Radar');
+%     xlabel('Y(m)'); ylabel('X(m)');
+%     axis equal; hold off; grid on;
+% end
 
 % 5.2 ENU coordinate
-% Draw stereo
+% Draw objects
 if StereoAnalysis == true
-    figure();
-    plot(EgoVehicle.enu(1, 1), EgoVehicle.enu(1, 2), 'r.');hold on;
+    figure(3);
+    plot(EgoVehicle.enu(1, 1), EgoVehicle.enu(1, 2), 'black.'); hold on;
     axis equal;
     grid on;
     xlabel('E(m)'); ylabel('N(m)');
 
-    if ViewStereoVideo == true
-        fnPlayVideo(EgoVehicle, TargetVehicle, Object.Stereo);
+    for idxFrame = 1:1:size(EgoVehicle.enu, 1)
+        plot(EgoVehicle.enu(idxFrame,1), EgoVehicle.enu(idxFrame,2), 'r.-'); hold on;
+        plot(TargetVehicle.enu(idxFrame,1), TargetVehicle.enu(idxFrame,2), 'b.-');
+        
+        if ViewStereoVideo == true && StereoAnalysis == true
+            for idx = 1:1:size(Object.Stereo.X_m, 1)
+                ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Stereo.X_m(idx,idxFrame), Object.Stereo.Y_m(idx,idxFrame), Object.Stereo.Valid(idx,idxFrame));
+                plot(ObjectEnu(:,1), ObjectEnu(:,2), 'go');
+            end
+%             fnPlayVideo(EgoVehicle, TargetVehicle, Object.Stereo);
+        end
+        
+        if ViewRadarVideo == true && RadarAnalysis == true
+            for idx = 1:1:size(Object.Radar.X_m, 1)
+                ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Radar.X_m(idx,idxFrame), Object.Radar.Y_m(idx,idxFrame), Object.Radar.Valid(idx,idxFrame));
+                plot(ObjectEnu(:,1), ObjectEnu(:,2), 'r^');
+            end
+        end
+        pause(0.01);
     end
-
-    cla;
-    plot(EgoVehicle.enu(:,1), EgoVehicle.enu(:,2), 'r.'); hold on;
-    plot(TargetVehicle.enu(:,1), TargetVehicle.enu(:,2), '.-');
-    for idx = 1:1:size(Object.Stereo.X_m, 1)
-        ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu, EgoVehicle.sig_State_Hdg, Object.Stereo.X_m(idx,:), Object.Stereo.Y_m(idx,:), Object.Stereo.Valid(idx,:));
-        plot(ObjectEnu(:,1), ObjectEnu(:,2), 'go');
-    end
-    legend('Ego vehicle', 'Target vehicle', 'Stereo Obj');
+    legend('Initial pos', 'Ego vehicle', 'Target vehicle', 'Stereo Obj', 'Radar Obj');
+    hold off;
 end
 
-% Draw radar
-if RadarAnalysis == true
-    figure();
-    plot(EgoVehicle.enu(1, 1), EgoVehicle.enu(1, 2), 'r.');hold on;
-    axis equal;
-    grid on;
-    xlabel('E(m)'); ylabel('N(m)');
-
-    if ViewRadarVideo == true
-        fnPlayVideo(EgoVehicle, TargetVehicle, Object.Radar);
-    end
-
-    cla;
-    plot(EgoVehicle.enu(:,1), EgoVehicle.enu(:,2), 'r.'); hold on;
-    plot(TargetVehicle.enu(:,1), TargetVehicle.enu(:,2), '.-');
-    for idx = 1:1:size(Object.Radar.X_m, 1)
-        ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu, EgoVehicle.sig_State_Hdg, Object.Radar.X_m(idx,:), Object.Radar.Y_m(idx,:), Object.Radar.Valid(idx,:));
-        plot(ObjectEnu(:,1), ObjectEnu(:,2), 'g^');
-    end
-    legend('Ego vehicle', 'Target vehicle', 'Radar Obj');
-end
+% % Draw radar
+% if RadarAnalysis == true
+%     figure(4);
+%     plot(EgoVehicle.enu(1, 1), EgoVehicle.enu(1, 2), 'r.');hold on;
+%     axis equal;
+%     grid on;
+%     xlabel('E(m)'); ylabel('N(m)');
+% 
+%     if ViewRadarVideo == true
+%         fnPlayVideo(EgoVehicle, TargetVehicle, Object.Radar);
+%     end
+% 
+%     cla;
+%     plot(EgoVehicle.enu(:,1), EgoVehicle.enu(:,2), 'r.'); hold on;
+%     plot(TargetVehicle.enu(:,1), TargetVehicle.enu(:,2), '.-');
+%     for idx = 1:1:size(Object.Radar.X_m, 1)
+%         figure(4);
+%         ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu, EgoVehicle.sig_State_Hdg, Object.Radar.X_m(idx,:), Object.Radar.Y_m(idx,:), Object.Radar.Valid(idx,:));
+%         plot(ObjectEnu(:,1), ObjectEnu(:,2), 'g^');
+%     end
+%     legend('Ego vehicle', 'Target vehicle', 'Radar Obj');
+% end
 
 % 
 % TargetVel = SynchedInfo.A1Vel_kph';
