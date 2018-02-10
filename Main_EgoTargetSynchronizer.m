@@ -12,6 +12,14 @@ ViewStereoVideo = true;
 RadarAnalysis = false;
 ViewRadarVideo = false;
 
+if StereoAnalysis == false
+    ViewStereoVideo = false;
+end
+
+if RadarAnalysis == false
+    ViewRadarVideo = false;
+end
+
 %% 01. Load the logging data
 % 1.1 extract GPS from FlexRay
 Flexray_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\KATRI_A1_11.mat';
@@ -83,7 +91,7 @@ TargetVehicle.enu = FnFast_llh2enu(RefPos.Lat, RefPos.Lon, TargetVehicle.OEM6_La
     TargetVehicle.enu - EgoVehicle.enu, TargetVehicle.OEM6_Heading);
 
 %% 04. Data association
-% fnDataAssociation(Object.Stereo.X_m, Object.Stereo.Y_m, TargetVehicle.X_local, TargetVehicle.Y_local);
+Object.Stereo.Associated = fnDataAssociation(Object.Stereo, TargetVehicle);
 
 %% 05. Plot
 
@@ -96,7 +104,7 @@ if StereoAnalysis == true || RadarAnalysis == true
     plot(TargetVehicle.Y_local, TargetVehicle.X_local, '.-'); hold on;
     
     if StereoAnalysis == true
-        fnPlotObject(Object.Stereo, 'go');
+        fnPlotObject(Object.Stereo.Associated, 'go');
 %         fnDrawBoundary(Object.Stereo);
     end
     if RadarAnalysis == true
@@ -104,29 +112,25 @@ if StereoAnalysis == true || RadarAnalysis == true
 %         fnDrawBoundary(Object.Radar);
     end
         
-    legend('GPS', 'Stereo', 'Radar');
+    if StereoAnalysis == true && RadarAnalysis == true
+        legend('GPS', 'Stereo', 'Radar');
+    elseif StereoAnalysis == true && RadarAnalysis == false
+        legend('GPS', 'Stereo');
+    elseif StereoAnalysis == false && RadarAnalysis == true
+        legend('GPS', 'Radar');
+    else
+        legend('GPS');
+    end
+    
     xlabel('Y(m)'); ylabel('X(m)');
     axis equal; hold off; grid on;
     ylim([-10 100]); xlim([-20 20]);
 end
 
 % % Draw radar
-% if RadarAnalysis == true
-%     figure('Position',[401,1,400,1000]);
-%     subplot(5,2,1:10);
-% 
-%     plot(TargetVehicle.Y_local, TargetVehicle.X_local, '.-'); hold on;
-%     fnPlotObject(Object.Radar, 'g^');
-%     fnDrawBoundary(Object.Radar);
-% 
-%     legend('GPS', 'Radar');
-%     xlabel('Y(m)'); ylabel('X(m)');
-%     axis equal; hold off; grid on;
-% end
-
 % 5.2 ENU coordinate
 % Draw objects
-if StereoAnalysis == true
+if StereoAnalysis == true || RadarAnalysis == true
     figure(3);
     plot(EgoVehicle.enu(1, 1), EgoVehicle.enu(1, 2), 'black.'); hold on;
     axis equal;
@@ -137,15 +141,18 @@ if StereoAnalysis == true
         plot(EgoVehicle.enu(idxFrame,1), EgoVehicle.enu(idxFrame,2), 'r.-'); hold on;
         plot(TargetVehicle.enu(idxFrame,1), TargetVehicle.enu(idxFrame,2), 'b.-');
         
-        if ViewStereoVideo == true && StereoAnalysis == true
+        if ViewStereoVideo == true
             for idx = 1:1:size(Object.Stereo.X_m, 1)
                 ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Stereo.X_m(idx,idxFrame), Object.Stereo.Y_m(idx,idxFrame), Object.Stereo.Valid(idx,idxFrame));
-                plot(ObjectEnu(:,1), ObjectEnu(:,2), 'go');
+%                 plot(ObjectEnu(:,1), ObjectEnu(:,2), 'go');
             end
+            ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Stereo.Associated.X_m(idxFrame), Object.Stereo.Associated.Y_m(idxFrame), Object.Stereo.Associated.Valid(idxFrame));
+            plot(ObjectEnu(:,1), ObjectEnu(:,2), 'go');
+%             fnPlotObject(Object.Stereo, 'go');
 %             fnPlayVideo(EgoVehicle, TargetVehicle, Object.Stereo);
         end
         
-        if ViewRadarVideo == true && RadarAnalysis == true
+        if ViewRadarVideo == true
             for idx = 1:1:size(Object.Radar.X_m, 1)
                 ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Radar.X_m(idx,idxFrame), Object.Radar.Y_m(idx,idxFrame), Object.Radar.Valid(idx,idxFrame));
                 plot(ObjectEnu(:,1), ObjectEnu(:,2), 'r^');
@@ -153,7 +160,16 @@ if StereoAnalysis == true
         end
         pause(0.01);
     end
-    legend('Initial pos', 'Ego vehicle', 'Target vehicle', 'Stereo Obj', 'Radar Obj');
+    
+    if StereoAnalysis == true && RadarAnalysis == true
+        legend('Initial pos', 'Ego GPS', 'Target GPS', 'Stereo Obj', 'Radar Obj');
+    elseif StereoAnalysis == true && RadarAnalysis == false
+        legend('Initial pos', 'Ego GPS', 'Target GPS', 'Stereo Obj');
+    elseif StereoAnalysis == false && RadarAnalysis == true
+        legend('Initial pos', 'Ego GPS', 'Target GPS', 'Radar Obj');
+    else
+        legend('Initial pos', 'Ego GPS', 'Target GPS');
+    end
     hold off;
 end
 

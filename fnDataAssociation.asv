@@ -1,0 +1,8 @@
+function AssociatedObj = fnDataAssociation( Obj_X, Obj_Y, Ref_X, Ref_Y)
+    for idxFrame = 1:1:size(Obj_X, 2)
+        mindist = 99999999;
+        for idxObj = 1:1:size(Obj_X, 1)
+            dist = sqrt(Obj_X(idxObj, idxFrame);
+        end
+    end
+end
