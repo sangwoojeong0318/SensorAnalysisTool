@@ -2,6 +2,7 @@ function StereoObj = fnGetStereoObj( CAN_raw )
 % Filtering 중복된 데이터
 UTCTime = CAN_raw.GPS_Type(:,1) * 10;
 [tmpSpace, idxUnique] = unique(UTCTime);
+idxUnique = idxUnique(tmpSpace ~= 0);
 
 % Get stereo info
 rad2deg = 180.0 / 3.141592;
