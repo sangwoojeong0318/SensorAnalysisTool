@@ -7,10 +7,10 @@ clc; clear all; close all;
 %% 00. Configuration
 db_mat_Path = 'DB\AutonomousFlexRay_DB.mat';
 StereoAnalysis = true;
-ViewStereoVideo = true;
+ViewStereoVideo = false;
 
 RadarAnalysis = false;
-ViewRadarVideo = true;
+ViewRadarVideo = false;
 
 if StereoAnalysis == false
     ViewStereoVideo = false;
@@ -22,13 +22,13 @@ end
 
 %% 01. Load the logging data
 % 1.1 extract GPS from FlexRay
-Flexray_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\KATRI_A1_15.mat';
+Flexray_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\KATRI_A1_9.mat';
 FlexRay_raw = load(Flexray_sig_path);
 
 FlexRay_GPS = fnGetFlexrayGPS(FlexRay_raw);
 
 % 1.2 extract GPS from CAN
-CAN_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\KATRI_Zoe2_M015.mat';
+CAN_sig_path = 'F:\00_DB\DANGUN\SensorEvaluation\[180208]_[KATRI]\KATRI_Zoe2_M009.mat';
 CAN_raw = load(CAN_sig_path);
 CAN_GPS = fnGetCANGPS(CAN_raw);
 
@@ -43,6 +43,8 @@ if RadarAnalysis == true
 end
 
 %% 02. Time synchronization
+% Erase repeted sensor data
+% StereoObj = fnEraseRepeatedData(StereoObj);
 % SynchedInfo = fnSynchronizer(EgoInfo, TargetInfo);
 [Synched_FR_Idx, Synched_CAN_Idx] = fnSynchronizer(FlexRay_GPS.UTCTime, CAN_GPS.UTCTime);
 
@@ -64,6 +66,12 @@ if StereoAnalysis == true
     Object.Stereo.Valid = StereoObj.Valid(:, Synched_CAN_Idx);
     Object.Stereo.X_m = StereoObj.X(:, Synched_CAN_Idx);
     Object.Stereo.Y_m = StereoObj.Y(:, Synched_CAN_Idx);
+    Object.Stereo.X_mid_m = StereoObj.mid_X(:, Synched_CAN_Idx);
+    Object.Stereo.Y_mid_m = StereoObj.mid_Y(:, Synched_CAN_Idx);
+    Object.Stereo.X_left_m = StereoObj.left_X(:, Synched_CAN_Idx);
+    Object.Stereo.Y_left_m = StereoObj.left_Y(:, Synched_CAN_Idx);
+    Object.Stereo.X_right_m = StereoObj.right_X(:, Synched_CAN_Idx);
+    Object.Stereo.Y_right_m = StereoObj.right_Y(:, Synched_CAN_Idx);
 end
 
 if RadarAnalysis == true
@@ -98,44 +106,92 @@ if RadarAnalysis == true
     Object.Radar.Associated = fnDataAssociation(Object.Radar, TargetVehicle);
 end
 
-%% 05. Plot
+%% 05. Calculate error
+MaskIdx = Object.Stereo.Associated.Valid == 1;
+[DistErr_X, DistErr_Y] = fnGetError(TargetVehicle.X_local(MaskIdx), TargetVehicle.Y_local(MaskIdx), Object.Stereo.Associated.X_m(MaskIdx), Object.Stereo.Associated.Y_m(MaskIdx));
+DistErr = sqrt(DistErr_X.*DistErr_X + DistErr_Y.*DistErr_Y);
+figure();
+subplot(3,1,1);
+plot(TargetVehicle.X_local(MaskIdx), DistErr_X, '.'); hold on;
+plot([0, max(TargetVehicle.X_local(MaskIdx))], [mean(abs(DistErr_X)), mean(abs(DistErr_X))], 'r');
+ylim([-5 5]);
+xlabel('X(m)'); ylabel('Error(m)');
+grid on;
+title(['X error(mean): ', num2str(mean(abs(DistErr_X))), ' (m)']);
 
+subplot(3,1,2);
+plot(TargetVehicle.X_local(MaskIdx), DistErr_Y, '.'); hold on;
+plot([0, max(TargetVehicle.X_local(MaskIdx))], [mean(abs(DistErr_Y)), mean(abs(DistErr_Y))], 'r');
+ylim([-5 5]);
+xlabel('X(m)'); ylabel('Error(m)');
+grid on;
+title(['Y error(mean): ', num2str(mean(abs(DistErr_Y))), ' (m)']);
+
+subplot(3,1,3);
+plot(TargetVehicle.X_local(MaskIdx), DistErr, '.'); hold on;
+plot([0, max(TargetVehicle.X_local(MaskIdx))], [mean(abs(DistErr)), mean(abs(DistErr))], 'r');
+ylim([-5 5]);
+xlabel('X(m)'); ylabel('Error(m)');
+grid on;
+title(['Dist error(mean): ', num2str(mean(abs(DistErr))), ' (m)']);
+%% 05. Plot
+figure();
+% Draw stereo shape
+if StereoAnalysis == true
+    for idxFrame = 1:1:length(Object.Stereo.X_mid_m)
+        for idxObj = 1:1:size(Object.Stereo.ID, 1)
+            if Object.Stereo.Valid(idxObj, idxFrame) == 1
+                plot([Object.Stereo.X_right_m(idxObj, idxFrame), Object.Stereo.X_mid_m(idxObj, idxFrame), Object.Stereo.X_left_m(idxObj, idxFrame)], ...
+                    [Object.Stereo.Y_right_m(idxObj, idxFrame), Object.Stereo.Y_mid_m(idxObj, idxFrame), Object.Stereo.Y_left_m(idxObj, idxFrame)], 'ro-');
+%                 hold on;
+                xlim([-5, 100]); ylim([-20, 20]);    
+                xlabel('X(m)'); ylabel('Y(m)');
+                axis equal; grid on;
+                pause();
+            end
+        end
+    end
+end
 % 5.1 Ego vehicle coordinate
 % Draw stereo/radar
 if StereoAnalysis == true || RadarAnalysis == true
-    figure('Position',[1,1,400,1000]);
+    figure('Position',[1,1,1000,400]);
     subplot(5,2,1:10);
 
-    plot(TargetVehicle.Y_local, TargetVehicle.X_local, '.-'); hold on;
+    plot(TargetVehicle.X_local, TargetVehicle.Y_local, '.-', 'Linewidth', 1); hold on;
     
     if StereoAnalysis == true
         fnPlotObject(Object.Stereo.Associated, 'go');
-%         fnDrawBoundary(Object.Stereo);
+        [FOV_L, FOV_R] = fnDrawBoundary(Object.Stereo);
+        fprintf(['Stereo FoV: ', num2str(FOV_R), ' ~ ', num2str(FOV_L), ' (deg)\n']);
     end
     if RadarAnalysis == true
-        fnPlotObject(Object.Radar.Associated, 'r^');
+        [FOV_L, FOV_R] = fnPlotObject(Object.Radar.Associated, 'r^');
+        fprintf(['Radar FoV: ', num2str(FOV_R), ' ~ ', num2str(FOV_L), ' (deg)\n']);
 %         fnDrawBoundary(Object.Radar);
     end
         
     if StereoAnalysis == true && RadarAnalysis == true
-        legend('GPS', 'Stereo', 'Radar');
+        legend('RTK GPS', 'Stereo obj', 'Radar obj');
     elseif StereoAnalysis == true && RadarAnalysis == false
-        legend('GPS', 'Stereo');
+        legend('RTK GPS', 'Stereo obj');
     elseif StereoAnalysis == false && RadarAnalysis == true
-        legend('GPS', 'Radar');
+        legend('RTK GPS', 'Radar obj');
     else
         legend('GPS');
     end
     
-    xlabel('Y(m)'); ylabel('X(m)');
+    xlabel('X(m)'); ylabel('Y(m)');
     axis equal; hold off; grid on;
-    ylim([-10 100]); xlim([-20 20]);
+%     title('Position
+%     title(['FoV: ', num2str(abs(FOV_R-FOV_L)), ' deg (', num2str(FOV_R), ' deg ~ ', num2str(FOV_L), ' deg)']);
+    xlim([-10 140]); ylim([-20 20]);
 end
 
 % % Draw radar
 % 5.2 ENU coordinate
 % Draw objects
-if StereoAnalysis == true || RadarAnalysis == true
+if ViewStereoVideo == true || ViewRadarVideo == true
     figure(3);
     plot(EgoVehicle.enu(1, 1), EgoVehicle.enu(1, 2), 'black^'); hold on;
     axis equal;

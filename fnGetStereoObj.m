@@ -177,7 +177,6 @@ StereoObj.heading(idxObj, :) = CAN_raw.Object_phi_12(idxUnique) * rad2deg;
 StereoObj.Vel(idxObj,:) = CAN_raw.Object_V_12(idxUnique) * mps2kph;
 StereoObj.Valid(idxObj, :) = StereoObj.ID(idxObj,:) ~= 0;
 
-
 % 
 % idxSte_start = 1;
 % for idxZoe = 1:1:size(Zoe.CANTime,2)

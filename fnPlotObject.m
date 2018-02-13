@@ -3,7 +3,7 @@ function fnPlotObject(Object, marker)
     Mask = Valid ~= 0;
     X = reshape(Object.X_m, [1, size(Object.X_m,1) * size(Object.X_m,2)]);
     Y = reshape(Object.Y_m, [1, size(Object.Y_m,1) * size(Object.Y_m,2)]);
-    plot(Y(Mask), X(Mask), marker);
+    plot(X(Mask), Y(Mask), marker);
     
 %     for idx = 1:1:size(Object.X_m,1)
 %         Mask = Object.Valid(idx,:) ~= 0;

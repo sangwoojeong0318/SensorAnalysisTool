@@ -16,8 +16,8 @@ function [ X_local, Y_local ] = fnCoordCvt_llh2local( EgoEnu, EgoHead, TargetEnu
         HeadingDiff(Erridx, 1) = TargetHead(Erridx) - EgoHead(1); % [deg]
 
         % Target vehicle position respect to ego vehicle coordinate
-        X_local(Erridx, 1) = tmp_CurrentPos_VehCoord(1);
-        Y_local(Erridx, 1) = tmp_CurrentPos_VehCoord(2);
+        X_local(1, Erridx) = tmp_CurrentPos_VehCoord(1);
+        Y_local(1, Erridx) = tmp_CurrentPos_VehCoord(2);
     end
 end
 
