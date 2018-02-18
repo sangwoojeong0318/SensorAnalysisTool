@@ -92,29 +92,48 @@ TargetVehicle.enu = FnFast_llh2enu(RefPos.Lat, RefPos.Lon, TargetVehicle.OEM6_La
     TargetVehicle.enu - EgoVehicle.enu, TargetVehicle.OEM6_Heading);
 
 %% Test
+ObjInfo = RadarObj;
+Keys = ObjInfo.keys;
+PrevTimeIdx = ones(size(Keys));
+AssoTimeIdx = ones(size(Keys));
+
 if StereoAnalysis == true
-    Object.Stereo = fnGetSynchedObj(TargetVehicle.UTCTime, TargetVehicle.X_local,  TargetVehicle.Y_local, StereoObj);
+    fnGetSynchedObj(TargetVehicle.UTCTime, TargetVehicle.X_local,  TargetVehicle.Y_local, StereoObj);
 end
 if RadarAnalysis == true
-    Object.Radar = fnGetSynchedObj(TargetVehicle.UTCTime, TargetVehicle.X_local,  TargetVehicle.Y_local, RadarObj);
+    fnGetSynchedObj(TargetVehicle.UTCTime, TargetVehicle.X_local,  TargetVehicle.Y_local, RadarObj);
 end
 
 %% 05. Calculate error
-if StereoAnalysis == true
-    MaskIdx = Object.Stereo.Valid == 1;
-    [DistErr_X, DistErr_Y] = fnGetError(TargetVehicle.X_local(MaskIdx), TargetVehicle.Y_local(MaskIdx), Object.Stereo.X_m(MaskIdx), Object.Stereo.Y_m(MaskIdx));
-    fnDisplayError(TargetVehicle.X_local(MaskIdx), DistErr_X, DistErr_Y);
-end
+MaskIdx = Object.Stereo.Valid == 1;
+[DistErr_X, DistErr_Y] = fnGetError(TargetVehicle.X_local(MaskIdx), TargetVehicle.Y_local(MaskIdx), Object.Stereo.X_m(MaskIdx), Object.Stereo.Y_m(MaskIdx));
+DistErr = sqrt(DistErr_X.*DistErr_X + DistErr_Y.*DistErr_Y);
+figure();
+subplot(3,1,1);
+plot(TargetVehicle.X_local(MaskIdx), DistErr_X, '.'); hold on;
+plot([0, max(TargetVehicle.X_local(MaskIdx))], [mean(abs(DistErr_X)), mean(abs(DistErr_X))], 'r');
+ylim([-5 5]);
+xlabel('X(m)'); ylabel('Error(m)');
+grid on;
+title(['X error(mean): ', num2str(mean(abs(DistErr_X))), ' (m)']);
 
-if RadarAnalysis == true
-    MaskIdx = Object.Radar.Valid == 1;
-    [DistErr_X, DistErr_Y] = fnGetError(TargetVehicle.X_local(MaskIdx), TargetVehicle.Y_local(MaskIdx), Object.Radar.X_m(MaskIdx), Object.Radar.Y_m(MaskIdx));
-    DistErr = sqrt(DistErr_X.*DistErr_X + DistErr_Y.*DistErr_Y);
-    fnDisplayError(TargetVehicle.X_local(MaskIdx), DistErr_X, DistErr_Y);
-end
+subplot(3,1,2);
+plot(TargetVehicle.X_local(MaskIdx), DistErr_Y, '.'); hold on;
+plot([0, max(TargetVehicle.X_local(MaskIdx))], [mean(abs(DistErr_Y)), mean(abs(DistErr_Y))], 'r');
+ylim([-5 5]);
+xlabel('X(m)'); ylabel('Error(m)');
+grid on;
+title(['Y error(mean): ', num2str(mean(abs(DistErr_Y))), ' (m)']);
 
+subplot(3,1,3);
+plot(TargetVehicle.X_local(MaskIdx), DistErr, '.'); hold on;
+plot([0, max(TargetVehicle.X_local(MaskIdx))], [mean(abs(DistErr)), mean(abs(DistErr))], 'r');
+ylim([-5 5]);
+xlabel('X(m)'); ylabel('Error(m)');
+grid on;
+title(['Dist error(mean): ', num2str(mean(abs(DistErr))), ' (m)']);
 %% 05. Plot
-% figure();
+figure();
 % % Draw stereo shape
 % if StereoAnalysis == true
 %     for idxFrame = 1:1:length(Object.Stereo.X_mid_m)
@@ -145,8 +164,7 @@ if StereoAnalysis == true || RadarAnalysis == true
         fprintf(['Stereo FoV: ', num2str(FOV_R), ' ~ ', num2str(FOV_L), ' (deg)\n']);
     end
     if RadarAnalysis == true
-        fnPlotObject(Object.Radar, 'r^');
-        [FOV_L, FOV_R] = fnDrawBoundary(Object.Radar);
+        [FOV_L, FOV_R] = fnPlotObject(Object.Radar.Associated, 'r^');
         fprintf(['Radar FoV: ', num2str(FOV_R), ' ~ ', num2str(FOV_L), ' (deg)\n']);
 %         fnDrawBoundary(Object.Radar);
     end
@@ -187,7 +205,7 @@ if ViewStereoVideo == true || ViewRadarVideo == true
                 ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Stereo.X_m(idx,idxFrame), Object.Stereo.Y_m(idx,idxFrame), Object.Stereo.Valid(idx,idxFrame));
 %                 plot(ObjectEnu(:,1), ObjectEnu(:,2), 'go');
             end
-            ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Stereo.X_m(idxFrame), Object.Stereo.Y_m(idxFrame), Object.Stereo.Valid(idxFrame));
+            ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Stereo.Associated.X_m(idxFrame), Object.Stereo.Associated.Y_m(idxFrame), Object.Stereo.Associated.Valid(idxFrame));
             plot(ObjectEnu(:,1), ObjectEnu(:,2), 'go');
 %             fnPlotObject(Object.Stereo, 'go');
 %             fnPlayVideo(EgoVehicle, TargetVehicle, Object.Stereo);
@@ -198,7 +216,7 @@ if ViewStereoVideo == true || ViewRadarVideo == true
                 ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Radar.X_m(idx,idxFrame), Object.Radar.Y_m(idx,idxFrame), Object.Radar.Valid(idx,idxFrame));
 %                 plot(ObjectEnu(:,1), ObjectEnu(:,2), 'r^');
             end
-            ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Radar.X_m(idxFrame), Object.Radar.Y_m(idxFrame), Object.Radar.Valid(idxFrame));
+            ObjectEnu = fnCoordCvt_local2enu(EgoVehicle.enu(idxFrame, :), EgoVehicle.sig_State_Hdg(idxFrame), Object.Radar.Associated.X_m(idxFrame), Object.Radar.Associated.Y_m(idxFrame), Object.Radar.Associated.Valid(idxFrame));
             plot(ObjectEnu(:,1), ObjectEnu(:,2), 'r^');
         end
         pause(0.01);
