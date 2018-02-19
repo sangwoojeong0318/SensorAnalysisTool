@@ -96,16 +96,15 @@ if StereoAnalysis == true
     Object.Stereo = fnGetSynchedObj(TargetVehicle.UTCTime, TargetVehicle.X_local,  TargetVehicle.Y_local, StereoObj);
     object_containers_map = containers.Map;
     for t = 1:size(Object.Stereo.ID,2)
-        time = Object.Stereo.ID(:,t);
-        id = Object.Stereo.ID(:,t);
-        [unique_id, ia, ic] = unique(id);
+        id = Object.Stereo.ID;
+        [unique_id, ia] = unique(id);
         for i = 1:length(unique_id)
             if unique_id(i) ~= 0                 
-                pos_x = Object.Stereo.X_m(ia(i),t);
-                pos_y = Object.Stereo.Y_m(ia(i),t);
-                len = Object.Stereo.X_m(ia(i),t);
-                width = Object.Stereo.X_m(ia(i),t);
-                heading_angle_rad = Object.Stereo.X_m(ia(i),t);
+                pos_x = StereoObj.x_m(ia(i),t);
+                pos_y = StereoObj.y_m(ia(i),t);
+                len = StereoObj.left_X(ia(i),t);
+                width = StereoObj.left_Y(ia(i),t);
+                heading_angle_rad = StereoObj.Orientation_rad(ia(i),t);
 
                 if isKey(object_containers_map,num2str(unique_id(i))) == 1
                     % existing id
@@ -123,21 +122,8 @@ if StereoAnalysis == true
                 end            
             end
         end
+    %         disp(t)
     end
-    
-    figure(99); clf;
-    plot(TargetVehicle.X_local, TargetVehicle.Y_local, '.-', 'Linewidth', 1); hold on;
-    k = keys(object_containers_map);
-    leg_list = {};
-    for i=1:size(k,2)
-        leg_list{i}=['ID = ', k{i}];
-        obj = object_containers_map(k{i});
-        figure(99); plot(obj.pos_y_m(:,2), obj.pos_x_m(:,2), '.'); 
-        grid on; axis equal; xlim([-20, 20]); ylim([-5, 100]);
-        pause();
-    end
-    legend(leg_list);
-
 end
 if RadarAnalysis == true
     Object.Radar = fnGetSynchedObj(TargetVehicle.UTCTime, TargetVehicle.X_local,  TargetVehicle.Y_local, RadarObj);
