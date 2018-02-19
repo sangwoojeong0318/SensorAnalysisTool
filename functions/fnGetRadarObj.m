@@ -45,7 +45,7 @@ function object_containers_map = fnGetRadarObj( CAN_raw )
 
     for idx_data = 1 : 1 : length(tmpRadarObj.NumObject)
         for idx_obj = 1 : 1 : RadarMaxObj
-            if idx_obj <= tmpRadarObj.NumObject(idx_data)
+%             if idx_obj <= tmpRadarObj.NumObject(idx_data)
                 x_m = tmp_x_m(idx_obj, idx_data);
                 y_m = tmp_y_m(idx_obj, idx_data);
                 tmp_ReferencePoint = tmpRadarObj.ReferencePoint(idx_obj, idx_data);
@@ -102,7 +102,7 @@ function object_containers_map = fnGetRadarObj( CAN_raw )
                 else
                     tmpRadarObj.Object_ID(idx_obj, idx_data) = 0;
                 end
-            end
+%             end
         end
     end
 

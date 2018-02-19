@@ -26,14 +26,14 @@ end
 %% 01. Load the logging data
 % 1.1 extract GPS from FlexRay
 
-Flexray_sig_path = 'D:\User\Sangwoo\git\SensorAnalysisTool\DB\180219\test\KATRI_A1_22.mat';
+Flexray_sig_path = 'D:\User\Sangwoo\git\SensorAnalysisTool\Logging\180219\KATRI_A1_271.mat';
 
 FlexRay_raw = load(Flexray_sig_path);
 
 FlexRay_GPS = fnGetFlexrayGPS(FlexRay_raw);
 
 % 1.2 extract GPS from CAN
-CAN_sig_path = 'D:\User\Sangwoo\git\SensorAnalysisTool\DB\180219\test\KATRI_Zoe1_008.mat';
+CAN_sig_path = 'D:\User\Sangwoo\git\SensorAnalysisTool\Logging\180219\180219_Katri_M018.mat';
 
 CAN_raw = load(CAN_sig_path);
 CAN_GPS = fnGetCANGPS(CAN_raw);
@@ -95,48 +95,48 @@ TargetVehicle.enu = FnFast_llh2enu(RefPos.Lat, RefPos.Lon, TargetVehicle.OEM6_La
 if StereoAnalysis == true
     Object.Stereo = fnGetSynchedObj(TargetVehicle.UTCTime, TargetVehicle.X_local,  TargetVehicle.Y_local, StereoObj);
     object_containers_map = containers.Map;
-    for t = 1:size(Object.Stereo.ID,2)
-        time = Object.Stereo.ID(:,t);
-        id = Object.Stereo.ID(:,t);
-        [unique_id, ia, ic] = unique(id);
-        for i = 1:length(unique_id)
-            if unique_id(i) ~= 0                 
-                pos_x = Object.Stereo.X_m(ia(i),t);
-                pos_y = Object.Stereo.Y_m(ia(i),t);
-                len = Object.Stereo.X_m(ia(i),t);
-                width = Object.Stereo.X_m(ia(i),t);
-                heading_angle_rad = Object.Stereo.X_m(ia(i),t);
-
-                if isKey(object_containers_map,num2str(unique_id(i))) == 1
-                    % existing id
-                    obj = object_containers_map(num2str(unique_id(i)));
-
-                    % add data
-                    object_containers_map(num2str(unique_id(i))) = obj.add_data(time, pos_x, pos_y, heading_angle_rad, width, len);
-                else
-                    % new id
-                    obj = object_class(unique_id(i));
-                    obj = obj.add_data(time, pos_x, pos_y, heading_angle_rad, width, len);
-
-                    % register new key
-                    object_containers_map(num2str(unique_id(i))) = obj;
-                end            
-            end
-        end
-    end
-    
-    figure(99); clf;
-    plot(TargetVehicle.X_local, TargetVehicle.Y_local, '.-', 'Linewidth', 1); hold on;
-    k = keys(object_containers_map);
-    leg_list = {};
-    for i=1:size(k,2)
-        leg_list{i}=['ID = ', k{i}];
-        obj = object_containers_map(k{i});
-        figure(99); plot(obj.pos_y_m(:,2), obj.pos_x_m(:,2), '.'); 
-        grid on; axis equal; xlim([-20, 20]); ylim([-5, 100]);
-        pause();
-    end
-    legend(leg_list);
+%     for t = 1:size(Object.Stereo.ID,2)
+%         time = Object.Stereo.ID(:,t);
+%         id = Object.Stereo.ID(:,t);
+%         [unique_id, ia, ic] = unique(id);
+%         for i = 1:length(unique_id)
+%             if unique_id(i) ~= 0                 
+%                 pos_x = Object.Stereo.X_m(ia(i),t);
+%                 pos_y = Object.Stereo.Y_m(ia(i),t);
+%                 len = Object.Stereo.X_m(ia(i),t);
+%                 width = Object.Stereo.X_m(ia(i),t);
+%                 heading_angle_rad = Object.Stereo.X_m(ia(i),t);
+% 
+%                 if isKey(object_containers_map,num2str(unique_id(i))) == 1
+%                     % existing id
+%                     obj = object_containers_map(num2str(unique_id(i)));
+% 
+%                     % add data
+%                     object_containers_map(num2str(unique_id(i))) = obj.add_data(time, pos_x, pos_y, heading_angle_rad, width, len);
+%                 else
+%                     % new id
+%                     obj = object_class(unique_id(i));
+%                     obj = obj.add_data(time, pos_x, pos_y, heading_angle_rad, width, len);
+% 
+%                     % register new key
+%                     object_containers_map(num2str(unique_id(i))) = obj;
+%                 end            
+%             end
+%         end
+%     end
+%     
+%     figure(99); clf;
+%     plot(TargetVehicle.X_local, TargetVehicle.Y_local, '.-', 'Linewidth', 1); hold on;
+%     k = keys(object_containers_map);
+%     leg_list = {};
+%     for i=1:size(k,2)
+%         leg_list{i}=['ID = ', k{i}];
+%         obj = object_containers_map(k{i});
+%         figure(99); plot(obj.pos_y_m(:,2), obj.pos_x_m(:,2), '.'); 
+%         grid on; axis equal; xlim([-20, 20]); ylim([-5, 100]);
+%         pause();
+%     end
+%     legend(leg_list);
 
 end
 if RadarAnalysis == true
