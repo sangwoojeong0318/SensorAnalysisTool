@@ -8,7 +8,7 @@ addpath('class');
 addpath('plot');
 
 %% 00. Configuration
-db_mat_Path = 'DB\AutonomousFlexRay_DB.mat';
+% db_mat_Path = 'DB\AutonomousFlexRay_DB.mat';
 StereoAnalysis = true;
 ViewStereoVideo = false;
 
